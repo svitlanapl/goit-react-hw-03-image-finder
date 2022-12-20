@@ -9,16 +9,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import { Button } from '../Button/Button';
 
-// const status = {
-//   IDLE: 'idle',
-//   PENDING: 'pending',
-//   RESOLVED: 'resolved',
-//   REJECTED: 'rejected',
-// };
 
 export class App extends Component {
   state = {
-    // status: status.IDLE,
     query: '',
     images: [],
     showButton: false,
@@ -28,8 +21,10 @@ export class App extends Component {
     error: null,
   };
 
-  handleFormSubmit = query => {
-    this.setState({ query });
+  handleFormSubmit = (query = '') => {
+    if (this.state.query  !== query  && query !== '') {
+      this.setState({ query , page: 1, totalPages: 0, images: [] });
+    }
   };
 
   componentDidUpdate = (_, prevState) => {
@@ -42,18 +37,20 @@ export class App extends Component {
 
       fetchImg(query, page)
         .then(images => {
-          images.data.hits.length === 0 && toast.info('Nothing found');
-          // console.log(query);
-
-          if (images.data.hits.length >= 12) {
+          const imagesData = images.data.hits;
+          imagesData.length === 0 && toast.info('Nothing found');
+      
+          if (imagesData.length >= 12) {
             this.setState({ showButton: true });
           } else this.setState({ showButton: false });
 
           if (prevQuery !== query) {
-            this.setState({ images: [...images.data.hits], isLoading: false });
+            this.setState({ images: [...imagesData], isLoading: false});
+
           } else
             this.setState({
-              images: [...prevState.images, ...images.data.hits],
+           
+              images: [...prevState.images, ...imagesData],
               isLoading: false,
             });
         })
@@ -62,7 +59,7 @@ export class App extends Component {
             error: toast.error('Something wrong, reload the page'),
           });
         });
-    }
+    };
     <ToastContainer />;
   };
 
